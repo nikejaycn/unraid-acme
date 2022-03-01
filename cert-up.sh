@@ -14,8 +14,6 @@ mkdir -p ${PKG_CRT_BASE_PATH}
 
 ACME_BIN_PATH=${BASE_ROOT}/acme.sh
 TEMP_PATH=${BASE_ROOT}/temp
-CRT_PATH_NAME=`cat ${CRT_BASE_PATH}/_archive/DEFAULT`
-CRT_PATH=${CRT_BASE_PATH}/_archive/${CRT_PATH_NAME}
 
 # 备份老版本的证书
 backupCrt () {
@@ -23,7 +21,7 @@ backupCrt () {
   BACKUP_PATH=${BASE_ROOT}/backup/${DATE_TIME}
   mkdir -p ${BACKUP_PATH}
   cp -r ${CRT_BASE_PATH} ${BACKUP_PATH}
-  cp -r ${PKG_CRT_BASE_PATH} ${BACKUP_PATH}/package_cert
+#   cp -r ${PKG_CRT_BASE_PATH} ${BACKUP_PATH}/package_cert
   echo ${BACKUP_PATH} > ${BASE_ROOT}/backup/latest
   echo 'done backupCrt'
   return 0
@@ -56,11 +54,11 @@ generateCrt () {
   ${ACME_BIN_PATH}/acme.sh  --register-account  -m ${DOMAIN_EMAIL} --server zerossl
   ${ACME_BIN_PATH}/acme.sh --force --log --issue --dns ${DNS} --dnssleep ${DNS_SLEEP} -d "${DOMAIN}"
   ${ACME_BIN_PATH}/acme.sh --force --installcert -d ${DOMAIN} \
-    --certpath ${CRT_PATH}/cert.pem \
-    --key-file ${CRT_PATH}/privkey.pem \
-    --fullchain-file ${CRT_PATH}/fullchain.pem
+    --certpath ${CRT_BASE_PATH}/cert.pem \
+    --key-file ${CRT_BASE_PATH}/privkey.pem \
+    --fullchain-file ${CRT_BASE_PATH}/fullchain.pem
 
-  if [ -s "${CRT_PATH}/cert.pem" ]; then
+  if [ -s "${CRT_BASE_PATH}/cert.pem" ]; then
     echo 'done generateCrt'
     return 0
   else
@@ -71,50 +69,17 @@ generateCrt () {
   fi
 }
 
-updateService () {
-  echo 'begin updateService'
-  echo 'cp cert path to des'
-  /bin/python2 ${BASE_ROOT}/crt_cp.py ${CRT_PATH_NAME}
-  echo 'done updateService'
-}
-
-reloadWebService () {
-  echo 'begin reloadWebService'
-  echo 'reloading new cert...'
-  /usr/syno/etc/rc.sysv/nginx.sh reload
-  echo 'relading Apache 2.2'
-  stop pkg-apache22
-  start pkg-apache22
-  reload pkg-apache22
-  echo 'done reloadWebService'  
-}
-
-revertCrt () {
-  echo 'begin revertCrt'
-  BACKUP_PATH=${BASE_ROOT}/backup/$1
-  if [ -z "$1" ]; then
-    BACKUP_PATH=`cat ${BASE_ROOT}/backup/latest`
-  fi
-  if [ ! -d "${BACKUP_PATH}" ]; then
-    echo "[ERR] backup path: ${BACKUP_PATH} not found."
-    return 1
-  fi
-  echo "${BACKUP_PATH}/certificate ${CRT_BASE_PATH}"
-  cp -rf ${BACKUP_PATH}/certificate/* ${CRT_BASE_PATH}
-  echo "${BACKUP_PATH}/package_cert ${PKG_CRT_BASE_PATH}"
-  cp -rf ${BACKUP_PATH}/package_cert/* ${PKG_CRT_BASE_PATH}
-  reloadWebService
-  echo 'done revertCrt'
-}
-
 updateCrt () {
   echo '------ begin updateCrt ------'
   backupCrt
   installAcme
   generateCrt
-#   updateService
-#   reloadWebService
   echo '------ end updateCrt ------'
+}
+
+revertCrt () {
+    echo 'begin revertCrt'
+    echo 'waiting todo...'
 }
 
 case "$1" in
