@@ -7,8 +7,11 @@ DATE_TIME=`date +%Y%m%d%H%M%S`
 # base crt path
 # CRT_BASE_PATH="/usr/syno/etc/certificate"
 # PKG_CRT_BASE_PATH="/usr/local/etc/certificate"
-CRT_BASE_PATH="/Users/JoeZhao/Downloads/cert-test/crt/certificate"
-PKG_CRT_BASE_PATH="/Users/JoeZhao/Downloads/cert-test/pkg/certificate"
+CRT_BASE_PATH="/mnt/user/appdata/acme.sh/certificate"
+PKG_CRT_BASE_PATH="/mnt/user/appdata/acme.sh/certificate"
+mkdir -p ${CRT_BASE_PATH}
+mkdir -p ${PKG_CRT_BASE_PATH}
+
 ACME_BIN_PATH=${BASE_ROOT}/acme.sh
 TEMP_PATH=${BASE_ROOT}/temp
 CRT_PATH_NAME=`cat ${CRT_BASE_PATH}/_archive/DEFAULT`
