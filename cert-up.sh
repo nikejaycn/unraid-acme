@@ -5,10 +5,10 @@ BASE_ROOT=$(cd "$(dirname "$0")";pwd)
 # date time
 DATE_TIME=`date +%Y%m%d%H%M%S`
 # base crt path
-# CRT_BASE_PATH="/usr/syno/etc/certificate"
-# PKG_CRT_BASE_PATH="/usr/local/etc/certificate"
-CRT_BASE_PATH="/mnt/user/appdata/acme.sh/certificate"
-PKG_CRT_BASE_PATH="/mnt/user/appdata/acme.sh/certificate"
+# 请在 config.env 中配置
+# CRT_BASE_PATH="/mnt/user/appdata/acme.sh/certificate"
+# PKG_CRT_BASE_PATH="/mnt/user/appdata/acme.sh/certificate"
+
 mkdir -p ${CRT_BASE_PATH}
 mkdir -p ${PKG_CRT_BASE_PATH}
 
@@ -55,7 +55,8 @@ generateCrt () {
   ${ACME_BIN_PATH}/acme.sh --force --log --issue --dns ${DNS} --dnssleep ${DNS_SLEEP} -d "${DOMAIN}"
   ${ACME_BIN_PATH}/acme.sh --force --installcert -d ${DOMAIN} \
     --certpath ${CRT_BASE_PATH}/cert.pem \
-    --key-file ${CRT_BASE_PATH}/privkey.pem \
+    --keypath ${CRT_BASE_PATH}/server.key \
+    --key-file ${CRT_BASE_PATH}/server.pem \
     --fullchain-file ${CRT_BASE_PATH}/fullchain.pem
 
   if [ -s "${CRT_BASE_PATH}/cert.pem" ]; then
