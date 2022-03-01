@@ -5,14 +5,16 @@ BASE_ROOT=$(cd "$(dirname "$0")";pwd)
 # date time
 DATE_TIME=`date +%Y%m%d%H%M%S`
 # base crt path
-CRT_BASE_PATH="/usr/syno/etc/certificate"
-PKG_CRT_BASE_PATH="/usr/local/etc/certificate"
-#CRT_BASE_PATH="/Users/carl/Downloads/certificate"
+# CRT_BASE_PATH="/usr/syno/etc/certificate"
+# PKG_CRT_BASE_PATH="/usr/local/etc/certificate"
+CRT_BASE_PATH="/Users/JoeZhao/Downloads/cert-test/crt/certificate"
+PKG_CRT_BASE_PATH="/Users/JoeZhao/Downloads/cert-test/pkg/certificate"
 ACME_BIN_PATH=${BASE_ROOT}/acme.sh
 TEMP_PATH=${BASE_ROOT}/temp
 CRT_PATH_NAME=`cat ${CRT_BASE_PATH}/_archive/DEFAULT`
 CRT_PATH=${CRT_BASE_PATH}/_archive/${CRT_PATH_NAME}
 
+# 备份老版本的证书
 backupCrt () {
   echo 'begin backupCrt'
   BACKUP_PATH=${BASE_ROOT}/backup/${DATE_TIME}
@@ -45,11 +47,12 @@ installAcme () {
 generateCrt () {
   echo 'begin generateCrt'
   cd ${BASE_ROOT}
-  source config
+  source config.env
   echo 'begin updating default cert by acme.sh tool'
   source ${ACME_BIN_PATH}/acme.sh.env
-  ${ACME_BIN_PATH}/acme.sh --force --log --issue --dns ${DNS} --dnssleep ${DNS_SLEEP} -d "${DOMAIN}" -d "*.${DOMAIN}"
-  ${ACME_BIN_PATH}/acme.sh --force --installcert -d ${DOMAIN} -d *.${DOMAIN} \
+  ${ACME_BIN_PATH}/acme.sh  --register-account  -m ${DOMAIN_EMAIL} --server zerossl
+  ${ACME_BIN_PATH}/acme.sh --force --log --issue --dns ${DNS} --dnssleep ${DNS_SLEEP} -d "${DOMAIN}"
+  ${ACME_BIN_PATH}/acme.sh --force --installcert -d ${DOMAIN} \
     --certpath ${CRT_PATH}/cert.pem \
     --key-file ${CRT_PATH}/privkey.pem \
     --fullchain-file ${CRT_PATH}/fullchain.pem
@@ -59,8 +62,8 @@ generateCrt () {
     return 0
   else
     echo '[ERR] fail to generateCrt'
-    echo "begin revert"
-    revertCrt
+    # echo "begin revert"
+    # revertCrt
     exit 1;
   fi
 }
@@ -106,8 +109,8 @@ updateCrt () {
   backupCrt
   installAcme
   generateCrt
-  updateService
-  reloadWebService
+#   updateService
+#   reloadWebService
   echo '------ end updateCrt ------'
 }
 
